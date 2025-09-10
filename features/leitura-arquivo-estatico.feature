@@ -6,45 +6,45 @@ Feature: Leitura de arquivo estático
   Background:
     Given que o comportamento padrão segue o tail do Linux
     And por padrão são exibidas as últimas 10 linhas
-    And a aplicação trabalha com um arquivo por vez
+    And a aplicação trabalha com um arquivo por vez -- concluido --
 
   Scenario: Ler arquivo estático com comportamento padrão (últimas 10 linhas)
     Given um arquivo de log estático com 1000 linhas
     When eu executo "java LogTailConsole /var/log/old.log"
     Then apenas as últimas 10 linhas devem ser exibidas
     And a aplicação deve terminar após exibir as linhas
-    And não deve entrar em modo de monitoramento
+    And não deve entrar em modo de monitoramento -- concluido --
 
   Scenario: Especificar número de linhas com flag -n
     Given um arquivo de log com 1000 linhas
     When eu executo "java LogTailConsole -n 50 /var/log/app.log"
     Then apenas as últimas 50 linhas devem ser exibidas
-    And a aplicação deve terminar após exibir as linhas
+    And a aplicação deve terminar após exibir as linhas -- concluido --
 
   Scenario: Usar sintaxe alternativa para número de linhas
     Given um arquivo de log com 1000 linhas
     When eu executo "java LogTailConsole -50 /var/log/app.log"
     Then apenas as últimas 50 linhas devem ser exibidas
-    And deve ter o mesmo comportamento que "-n 50"
+    And deve ter o mesmo comportamento que "-n 50" -- concluido --
 
   Scenario: Exibir todas as linhas do arquivo
     Given um arquivo de log com 500 linhas
     When eu executo "java LogTailConsole -n +1 /var/log/app.log"
     Then todas as 500 linhas devem ser exibidas
-    And deve começar da primeira linha
+    And deve começar da primeira linha -- concluido --
 
   Scenario: Comportamento com arquivo pequeno
     Given um arquivo de log com apenas 5 linhas
     When eu executo "java LogTailConsole /var/log/small.log"
     Then todas as 5 linhas devem ser exibidas
-    And não deve tentar exibir linhas inexistentes
+    And não deve tentar exibir linhas inexistentes -- concluido --
 
   Scenario: Comportamento com arquivo vazio
     Given um arquivo de log vazio
     When eu executo "java LogTailConsole /var/log/empty.log"
     Then nenhuma linha deve ser exibida
     And a aplicação deve terminar imediatamente
-    And não deve exibir erro
+    And não deve exibir erro -- concluido --
 
   Scenario: Combinar leitura estática com filtros
     Given um arquivo de log com 1000 linhas
