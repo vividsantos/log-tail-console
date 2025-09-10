@@ -17,7 +17,7 @@ public class LogTailConsole {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
 
-            if (!arg.startsWith("-")) {
+            if (!arg.startsWith("-") && !arg.startsWith("+")) {
                 filePath = arg;
             } else if ("-n".equalsIgnoreCase(arg) && i + 1 < args.length) {
                 linhasDesejadas = args[++i] != null ? Integer.parseInt(args[i]) : 10;
