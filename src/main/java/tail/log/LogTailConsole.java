@@ -5,14 +5,14 @@ import java.nio.charset.StandardCharsets;
 
 public class LogTailConsole {
     public static void main(String[] args) {
-        if (args.length == 0) {
-            System.out.println("Por favor, forneça o caminho do arquivo de log como argumento.");
-            return;
-        }
+//        if (args.length == 0) {
+//            System.out.println("Por favor, forneça o caminho do arquivo de log como argumento.");
+//            return;
+//        }
 
-        String filePath = null;
-        int linhasDesejadas = 10;
-        boolean lerTudo = false;
+        String filePath = "testelog.txt";
+        int linhasDesejadas = 1;
+        boolean lerTudo = true;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -29,9 +29,33 @@ public class LogTailConsole {
         }
 
         lerArquivo(filePath, linhasDesejadas, lerTudo);
+        lerArquivoFiltro(filePath,2, linhasDesejadas, "ERRO");
     }
 
     private static void lerArquivo(String filePath, int linhasDesejadas, boolean lerTudo) {
+
+        String resultado = leituraArquivo(filePath, linhasDesejadas, lerTudo);
+        assert resultado != null;
+        System.out.println(resultado.trim());
+
+    }
+
+    private static void lerArquivoFiltro(String filePath, int n, int linhasDesejadas, String filter) {
+        String resultado = leituraArquivo(filePath,  linhasDesejadas, true);
+        assert resultado != null;
+        String[] linhas = resultado.split("\n");
+        System.out.println("---------------filtro---------------");
+        int count = 0;
+        for (int i = linhas.length - 1; i >= 0; i--) {
+            if (linhas[i].contains(filter)) {
+                System.out.println(linhas[i].trim());
+                count++;
+                if(count>=n) break;
+            }
+        }
+    }
+
+    private static String leituraArquivo(String filePath, int linhasDesejadas, boolean lerTudo) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             long fileLength = raf.length(); // tamanho em bytes
             long pointer = fileLength - 1; // aponta para o último byte do arquivo
@@ -60,11 +84,11 @@ public class LogTailConsole {
                 conteudo[j] = item;
             }
 
-            String resultado = new String(conteudo, StandardCharsets.UTF_8);
-            System.out.println(resultado.trim());
+            return new String(conteudo, StandardCharsets.UTF_8).trim();
 
         } catch (Exception e) {
             System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+            return null;
         }
     }
 }

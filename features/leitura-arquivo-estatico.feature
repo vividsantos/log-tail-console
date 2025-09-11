@@ -50,7 +50,7 @@ Feature: Leitura de arquivo estático
     Given um arquivo de log com 1000 linhas
     And 5 das últimas 10 linhas contêm "ERROR"
     When eu executo "java LogTailConsole -n 10 --filter ERROR /var/log/app.log"
-    Then apenas as 5 linhas com "ERROR" das últimas 10 devem ser exibidas
+    Then apenas as 5 linhas com "ERROR" das últimas 10 devem ser exibidas --concluido--
 
   Scenario: Validar parâmetro -n com valores inválidos
     When eu executo "java LogTailConsole -n 0 /var/log/app.log"
