@@ -52,7 +52,7 @@ Feature: Leitura de arquivo estático
     When eu executo "java LogTailConsole -n 10 --filter ERROR /var/log/app.log"
     Then apenas as 5 linhas com "ERROR" das últimas 10 devem ser exibidas --concluido--
 
-  Scenario: Validar parâmetro -n com valores inválidos
+  Scenario: Validar parâmetro -n com valores inválidos --concluido--
     When eu executo "java LogTailConsole -n 0 /var/log/app.log"
     Then deve exibir erro "Invalid number of lines: 0"
     And deve sugerir "Use positive number or +1 for all lines"
@@ -63,13 +63,13 @@ Feature: Leitura de arquivo estático
     When eu executo "java LogTailConsole -n abc /var/log/app.log"
     Then deve exibir erro "Invalid number format: abc"
 
-  Scenario: Rejeitar múltiplos arquivos
+  Scenario: Rejeitar múltiplos arquivos --concluido--
     When eu executo "java LogTailConsole /var/log/app1.log /var/log/app2.log"
     Then deve exibir erro "Multiple files not supported in this version"
     And deve sugerir "Process one file at a time"
     And deve retornar código de saída diferente de zero
 
-  Scenario: Performance com arquivos grandes
+  Scenario: Performance com arquivos grandes --concluido--
     Given um arquivo de log de 10GB com milhões de linhas
     When eu executo "java LogTailConsole -n 10 /var/log/huge.log"
     Then deve ler apenas o final do arquivo

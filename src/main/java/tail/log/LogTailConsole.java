@@ -9,13 +9,13 @@ public class LogTailConsole {
     public static void main(String[] args) {
         LogTailArgsParser parser = new LogTailArgsParser(args);
 
-        if (parser.filePath == null) {
-            System.out.println("Por favor, forneça o caminho do arquivo de log como argumento.");
-            return;
-        }
+        assert parser.filePath != null : "Caminho do arquivo de log não fornecido.";
 
-        lerArquivo(parser.filePath, parser.linhasDesejadas, parser.lerTudo);
-        lerArquivoFiltro(parser.filePath, parser.linhasDesejadas, parser.filter);
+        if(parser.filter == null) {
+            lerArquivo(parser.filePath, parser.lerTudo, parser.linhasDesejadas);
+        } else{
+            lerArquivoFiltro(parser.filePath, parser.linhasDesejadas, parser.filter);
+        }
     }
 }
 

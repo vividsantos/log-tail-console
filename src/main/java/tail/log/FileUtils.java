@@ -8,34 +8,31 @@ public class FileUtils {
 
     private static String leituraArquivo(String filePath, boolean lerTudo, int linhasDesejadas) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-            long fileLength = raf.length(); // tamanho em bytes
-            long pointer = fileLength - 1; // aponta para o último byte do arquivo
+            long fileLength = raf.length();
+            long pointer = fileLength - 1;
             int linhasEncontradas = 0;
+            StringBuilder sb = new StringBuilder();
+
             if (lerTudo) {
-                linhasDesejadas = (int) (raf.length() - 1);
+                raf.seek(0);
+                byte[] conteudo = new byte[(int) fileLength];
+                raf.readFully(conteudo);
+                return new String(conteudo, StandardCharsets.UTF_8).trim();
             }
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            while (pointer >= 0 && linhasEncontradas <= linhasDesejadas) {
+            while (pointer >= 0 && linhasEncontradas < linhasDesejadas) {
                 raf.seek(pointer);
-                int qtByte = raf.readByte();
-                baos.write(qtByte);
-
-                if (qtByte == '\n') {
+                int b = raf.readByte();
+                sb.append((char) b);
+                if (b == '\n') {
                     linhasEncontradas++;
                 }
                 pointer--;
             }
 
-            byte[] conteudo = baos.toByteArray();
-            for (int i = 0, j = conteudo.length - 1; i < j; i++, j--) {
-                byte item = conteudo[i];
-                conteudo[i] = conteudo[j];
-                conteudo[j] = item;
-            }
-
-            return new String(conteudo, StandardCharsets.UTF_8).trim();
+            // Inverte o resultado para ordem correta
+            sb.reverse();
+            return sb.toString().trim();
 
         } catch (Exception e) {
             System.out.println("Erro ao ler o arquivo: " + e.getMessage());
@@ -43,7 +40,7 @@ public class FileUtils {
         }
     }
 
-    public static void lerArquivo(String filePath, int linhasDesejadas, boolean lerTudo) {
+    public static void lerArquivo(String filePath, boolean lerTudo, int linhasDesejadas) {
 
         String resultado = leituraArquivo(filePath, lerTudo, linhasDesejadas);
         assert resultado != null;
@@ -55,7 +52,7 @@ public class FileUtils {
         String resultado = leituraArquivo(filePath, true, 4); //por ler tudo ser true não importa o numero de linhas
         assert resultado != null;
         String[] linhas = resultado.split("\n");
-        System.out.println("---------------filtro---------------");
+
         int count = 0;
         for (int i = linhas.length - 1; i >= 0; i--) {
             if (linhas[i].contains(filter)) {
