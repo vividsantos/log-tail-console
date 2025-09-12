@@ -2,7 +2,7 @@ package tail.log;
 
 public class LogTailArgsParser {
     public String filePath;
-    public int linhasDesejadas = 1;
+    public int linhasDesejadas = 10;
     public boolean lerTudo = false;
     public String filter = null;
 
@@ -25,14 +25,14 @@ public class LogTailArgsParser {
                     System.err.println("Insira o número de linhas desejadas");
                     System.exit(1);
                 }
-                String valor = args[++i];
+                String valor = args[++i] != null ? args[++i] : "10";
                 LogTailArgsValidator.validarNumeroDeLinhas(valor);
                 linhasDesejadas = Integer.parseInt(valor);
             } else if (arg.startsWith("-") && arg.length() > 1 && Character.isDigit(arg.charAt(1))) {
                 linhasDesejadas = Integer.parseInt(arg.substring(1));
             } else if (arg.startsWith("+") && arg.length() > 1 && Character.isDigit(arg.charAt(1))) {
                 lerTudo = true;
-            } else if ("-f".equalsIgnoreCase(arg) && i + 1 < args.length) {
+            } else if ("--filter".equalsIgnoreCase(arg) && i + 1 < args.length) {
                 filter = args[++i];
             }
         }
