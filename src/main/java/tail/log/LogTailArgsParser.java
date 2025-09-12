@@ -21,11 +21,13 @@ public class LogTailArgsParser {
                 }
                 filePath = arg;
             } else if ("-n".equalsIgnoreCase(arg)) {
-                if (i + 1 >= args.length || args[i + 1].startsWith("-")) {
-                    System.err.println("Insira o número de linhas desejadas");
+                if (++i >= args.length || args[i + 1].startsWith("-")) {
+                    System.out.println("Invalid number of lines: " + null);
+                    System.out.println("Use positive number or +1 for all lines");
                     System.exit(1);
                 }
-                String valor = args[++i] != null ? args[++i] : "10";
+
+                String valor = args[++i];
                 LogTailArgsValidator.validarNumeroDeLinhas(valor);
                 linhasDesejadas = Integer.parseInt(valor);
             } else if (arg.startsWith("-") && arg.length() > 1 && Character.isDigit(arg.charAt(1))) {
