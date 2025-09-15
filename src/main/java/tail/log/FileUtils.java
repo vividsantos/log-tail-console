@@ -69,7 +69,11 @@ public class FileUtils {
     }
 
     public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter) {
-        showFile(filePath, readAll, wantedLines);
+        if (filter == null) {
+            showFile(filePath, readAll, wantedLines);
+        } else {
+            showFileWithFilter(filePath, readAll, wantedLines, filter);
+        }
 
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             long fileLength = raf.length();
@@ -77,7 +81,9 @@ public class FileUtils {
 
             while (true) {
                 long currentLength = raf.length();
-                if (currentLength > pointer) {
+                if (currentLength < pointer) {
+                    pointer = currentLength;
+                } else if (currentLength > pointer) {
                     raf.seek(pointer);
                     String line;
                     while ((line = raf.readLine()) != null) {

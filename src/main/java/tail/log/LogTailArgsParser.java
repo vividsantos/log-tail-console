@@ -17,8 +17,8 @@ public class LogTailArgsParser {
                 arquivosEncontrados++;
                 if (arquivosEncontrados > 1) {
                     System.err.println("Multiple files not supported in this version");
-                    System.err.println("Process one file at a time");
-                    System.err.println("Use: java LogTailConsole <single-file>");
+                    System.out.println("This feature is planned for a future release.");
+                    System.err.println("Current usage: java LogTailConsole [OPTIONS] FILE");
                     System.exit(2);
                 }
                 filePath = arg;
