@@ -7,7 +7,7 @@ public class LogTailConsole {
         LogTailArgsParser parser = new LogTailArgsParser(args);
 
          if (parser.filePath == null) {
-             System.out.println("Caminho do arquivo de log não fornecido.");
+             System.out.println("Log path not provided.");
              return;
          }
 
