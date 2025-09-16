@@ -11,11 +11,15 @@ public class LogTailConsole {
              return;
          }
 
-        if(parser.filter == null) {
-            exibirArquivo(parser.filePath, parser.lerTudo, parser.linhasDesejadas);
-        } else{
-            exibirArquivoFiltro(parser.filePath, parser.lerTudo, parser.linhasDesejadas, parser.filter);
+        if(parser.filter != null) {
+            showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
         }
+
+        if (parser.following) {
+            followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+        }
+
+        showFile(parser.filePath, parser.readAll, parser.wantedLines);
     }
 }
 
