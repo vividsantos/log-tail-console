@@ -1,6 +1,7 @@
 package tail.log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
@@ -39,8 +40,13 @@ public class FileUtils {
             String resultado = new String(conteudo, StandardCharsets.UTF_8);
             return resultado.trim();
 
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + filePath);
+            System.exit(1);
+            return null;
         } catch (Exception e) {
-            System.out.println("Error reading file: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
+            System.exit(1);
             return null;
         }
     }
@@ -90,8 +96,12 @@ public class FileUtils {
                 }
                 Thread.sleep(1000);
             }
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found: " + filePath);
+            System.exit(1);
         } catch (Exception e) {
             System.out.println("Error during following file: " + e.getMessage());
+            System.exit(1);
         }
     }
 }
