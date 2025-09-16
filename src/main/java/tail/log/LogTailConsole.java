@@ -7,7 +7,8 @@ public class LogTailConsole {
         LogTailArgsParser parser = new LogTailArgsParser(args);
 
          if (parser.filePath == null) {
-             System.out.println("Log path not provided.");
+             System.err.println("Missing file argument.");
+             System.err.println("Usage: java LogTailConsole [OPTIONS] FILE");
              return;
          }
 
