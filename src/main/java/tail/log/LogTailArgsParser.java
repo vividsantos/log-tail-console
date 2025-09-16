@@ -49,13 +49,13 @@ public class LogTailArgsParser {
             } else if (arg.equalsIgnoreCase("--filter") && i + 1 < args.length) {
                 filter = args[i + 1];
                 i++;
+            } else if (arg.equalsIgnoreCase("-f") || arg.equalsIgnoreCase("--follow")) {
+                following = true;
             } else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
             }
-//            else if (arg.equalsIgnoreCase("-f") || arg.equalsIgnoreCase("--follow")) {
-//                following = true;
-//            }
+
         }
     }
 }
