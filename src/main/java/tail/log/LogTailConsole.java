@@ -12,12 +12,14 @@ public class LogTailConsole {
              return;
          }
 
-        if(parser.filter != null) {
-            showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
-        }
-
         if (parser.following) {
             followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+            return;
+        }
+
+        if (parser.filter != null) {
+            showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+            return;
         }
 
         showFile(parser.filePath, parser.readAll, parser.wantedLines);
