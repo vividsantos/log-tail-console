@@ -88,6 +88,7 @@ public class FileUtils {
             while (true) {
                 long currentLength = raf.length();
                 if (currentLength < pointer) {
+                    System.out.println("Log file truncated, restarting from beginning");
                     pointer = currentLength;
                 } else if (currentLength > pointer) {
                     raf.seek(pointer);
