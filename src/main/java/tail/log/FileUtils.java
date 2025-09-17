@@ -1,6 +1,7 @@
 package tail.log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
@@ -80,28 +81,69 @@ public class FileUtils {
         } else {
             showFileWithFilter(filePath, readAll, wantedLines, filter);
         }
-
-        try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-            long fileLength = raf.length();
+        try {
+            File file = new File(filePath);
+            long lastModified = file.lastModified();
+            long fileLength = file.length();
             long pointer = fileLength;
 
-            while (true) {
-                long currentLength = raf.length();
-                if (currentLength < pointer) {
-                    System.out.println("Log file truncated, restarting from beginning");
-                    pointer = currentLength;
-                } else if (currentLength > pointer) {
-                    raf.seek(pointer);
-                    String line;
-                    while ((line = raf.readLine()) != null) {
-                        String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                        if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
-                            System.out.println(decodedLine);
+            try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
+                while (true) {
+                    if (!file.exists()) {
+                        System.out.println("File deleted, waiting for it to be recreated...");
+                        while (!file.exists()) {
+                            Thread.sleep(1000);
                         }
+                        System.out.println("File recreated, resuming...");
+                        raf.close();
+                        followingFile(filePath, false, 0, filter);
+                        return;
                     }
-                    pointer = raf.getFilePointer();
+
+                    long currentModified = file.lastModified();
+                    long currentLength = file.length();
+
+                    if (currentModified != lastModified && currentLength < fileLength) {
+                        System.out.println("Log file rotated, starting from beginning");
+                        raf.close();
+                        followingFile(filePath, false, 0, filter);
+                        return;
+                    } else if (currentLength < pointer) {
+                        System.out.println("Log file truncated, restarting from beginning");
+                        pointer = 0;
+                        raf.seek(0);
+                    } else if (currentLength > pointer) {
+                        raf.seek(pointer);
+                        String line;
+                        while ((line = raf.readLine()) != null) {
+                            String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+                            if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
+                                System.out.println(decodedLine);
+                            }
+                        }
+                        pointer = raf.getFilePointer();
+                    }
+
+                    lastModified = currentModified;
+                    fileLength = currentLength;
+                    Thread.sleep(1000);
+
+//                    if (currentLength < pointer) {
+//                        System.out.println("Log file truncated, restarting from beginning");
+//                        pointer = currentLength;
+//                    } else if (currentLength > pointer) {
+//                        raf.seek(pointer);
+//                        String line;
+//                        while ((line = raf.readLine()) != null) {
+//                            String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+//                            if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
+//                                System.out.println(decodedLine);
+//                            }
+//                        }
+//                        pointer = raf.getFilePointer();
+//                    }
+//                    Thread.sleep(1000);
                 }
-                Thread.sleep(1000);
             }
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);

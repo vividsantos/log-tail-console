@@ -29,7 +29,7 @@ public class LogTailArgsParser {
                 }
                 if (args.length >= i + 1  && Character.isDigit(args[i + 1].charAt(0))) {
                     String valor = args[i + 1];
-                    LogTailArgsValidator.validarNumeroDeLinhas(valor);
+//                    LogTailArgsValidator.validarNumeroDeLinhas(valor);
                     wantedLines = Integer.parseInt(valor);
                 } else if (args[i + 1].startsWith("+") && args[i + 1].length() == 2 && args[i + 1].charAt(1) == '1') {
                     readAll = true;
