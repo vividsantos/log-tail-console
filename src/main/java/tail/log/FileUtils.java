@@ -61,10 +61,19 @@ public class FileUtils {
 
     public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
+            String[] termos = filter.split("\\|");
             String[] linhas = resultado.split("\n");
             int count = 0;
             for (int i = linhas.length - 1; i >= 0; i--) {
-                if (linhas[i].toLowerCase().contains(filter.toLowerCase())) {
+                String linhaLower = linhas[i].toLowerCase();
+                boolean encontrou = false;
+                for (String termo : termos) {
+                    if (linhaLower.contains(termo.toLowerCase())) {
+                        encontrou = true;
+                        break;
+                    }
+                }
+                if (encontrou) {
                     System.out.println(linhas[i].trim());
                     count++;
                     if (count >= wantedLines) break;
@@ -80,6 +89,19 @@ public class FileUtils {
             for (String linha : linhas) {
                 if (pattern.matcher(linha).find()) {
                     System.out.println(linha.trim());
+                }
+            }
+        });
+    }
+
+    public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
+        readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
+            Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
+            String[] linhas = resultado.split("\n");
+            int count = 0;
+            for (int i = linhas.length - 1; i >= 0; i--) {
+                if (!pattern.matcher(linhas[i]).find()) {
+                    System.out.println(linhas[i].trim());
                 }
             }
         });

@@ -5,7 +5,7 @@ import static tail.log.FileUtils.*;
 public class LogTailConsole {
 
     enum Mode {
-        FOLLOW, FILTER, REGEX, SHOW, INVALID
+        FOLLOW, FILTER, REGEX, SHOW, INVALID, EXCLUDE
     }
 
     public static void main(String[] args) {
@@ -20,6 +20,8 @@ public class LogTailConsole {
             mode = Mode.FILTER;
         } else if (parser.regex != null) {
             mode = Mode.REGEX;
+        } else if (parser.exclude != null) {
+            mode = Mode.EXCLUDE;
         }
 
         switch (mode) {
@@ -34,6 +36,9 @@ public class LogTailConsole {
                 break;
             case REGEX:
                 showFileWithRegex(parser.filePath, parser.readAll, parser.wantedLines, parser.regex);
+                break;
+            case EXCLUDE:
+                showFileWithExclude(parser.filePath, parser.readAll, parser.wantedLines, parser.exclude);
                 break;
             case SHOW:
                 showFile(parser.filePath, parser.readAll, parser.wantedLines);
