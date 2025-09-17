@@ -43,6 +43,12 @@ public class LogTailArgsParser {
                 }
                 i++;
             } else if (arg.startsWith("-") && arg.length() > 1 && Character.isDigit(arg.charAt(1))) {
+                if (Integer.parseInt(arg.substring(1)) <= 0) {
+                    System.err.println("Invalid number of lines: " + arg.substring(1));
+                    System.err.println("Use positive number or +1 for all lines");
+                    System.exit(1);
+                }
+
                 wantedLines = Integer.parseInt(arg.substring(1));
             } else if (arg.startsWith("+") && arg.length() == 2 && arg.charAt(1) == '1') {
                 readAll = true;
