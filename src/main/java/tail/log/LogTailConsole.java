@@ -21,6 +21,10 @@ public class LogTailConsole {
             return;
         }
 
+        if (parser.regex != null) {
+            showFileWithRegex(parser.filePath, parser.readAll, parser.wantedLines, parser.regex);
+        }
+
         showFile(parser.filePath, parser.readAll, parser.wantedLines);
     }
 }

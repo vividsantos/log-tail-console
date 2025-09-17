@@ -3,6 +3,7 @@ package tail.log;
 import java.util.Objects;
 
 public class LogTailArgsParser {
+    public String regex = null;
     public String filePath;
     public int wantedLines = 10;
     public boolean readAll = false;
@@ -51,6 +52,8 @@ public class LogTailArgsParser {
             } else if (arg.equalsIgnoreCase("--filter") && i + 1 < args.length) {
                 filter = args[i + 1];
                 i++;
+            } else if ("--regex".equals(args[i]) && i + 1 < args.length) {
+                regex = args[++i];
             } else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
