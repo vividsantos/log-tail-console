@@ -92,25 +92,27 @@ public class FileUtils {
             BasicFileAttributes bfattr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
             long creationTime = bfattr.creationTime().toInstant().toEpochMilli();
 
-            try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-                while (true) {
-                    if (!file.exists()) {
-                        System.out.println("File deleted, waiting for it to be recreated...");
-                        while (!file.exists()) {
-                            Thread.sleep(1000);
-                        }
-                        System.out.println("File recreated, resuming...");
-                        raf.close();
-                        followingFile(filePath, false, 0, filter);
-                        return;
+
+            while (true) {
+                if (!file.exists()) {
+                    System.out.println("File deleted, waiting for it to be recreated...");
+                    while (!file.exists()) {
+                        Thread.sleep(1000);
                     }
+                    System.out.println("File recreated, resuming...");
+                    followingFile(filePath, false, 0, filter);
+                    return;
+                }
 
+
+                try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
                     long currentLength = file.length();
-                    long lastCreationTime = bfattr.creationTime().toInstant().toEpochMilli();
+                    BasicFileAttributes currentAttrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                    long currentCreationTime = currentAttrs.creationTime().toInstant().toEpochMilli();
 
-                    if (lastCreationTime != creationTime && currentLength < fileLength) {
+                    if (currentCreationTime != creationTime) {
                         System.out.println("Log file rotated, starting from beginning");
-                        raf.close();
+                        pointer = 0;
                         followingFile(filePath, false, 0, filter);
                         return;
                     } else if (currentLength < pointer) {
@@ -129,6 +131,7 @@ public class FileUtils {
                         pointer = raf.getFilePointer();
                     }
 
+                    creationTime = currentCreationTime;
                     fileLength = currentLength;
                     Thread.sleep(1000);
                 }
