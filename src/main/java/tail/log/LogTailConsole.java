@@ -1,7 +1,5 @@
 package tail.log;
 
-import static tail.log.FileUtils.*;
-
 public class LogTailConsole {
 
     enum Mode {
@@ -29,19 +27,19 @@ public class LogTailConsole {
                 System.out.println("Log path not provided.");
                 break;
             case FOLLOW:
-                followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+                FileService.followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
                 break;
             case FILTER:
-                showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+                FileService.showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
                 break;
             case REGEX:
-                showFileWithRegex(parser.filePath, parser.readAll, parser.wantedLines, parser.regex);
+                FileService.showFileWithRegex(parser.filePath, parser.readAll, parser.wantedLines, parser.regex);
                 break;
             case EXCLUDE:
-                showFileWithExclude(parser.filePath, parser.readAll, parser.wantedLines, parser.exclude);
+                FileService.showFileWithExclude(parser.filePath, parser.readAll, parser.wantedLines, parser.exclude);
                 break;
             case SHOW:
-                showFile(parser.filePath, parser.readAll, parser.wantedLines);
+                FileService.showFile(parser.filePath, parser.readAll, parser.wantedLines);
                 break;
         }
     }
