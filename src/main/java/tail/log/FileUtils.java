@@ -1,15 +1,17 @@
 package tail.log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileUtils {
+    private static BasicFileAttributes fileAttributes;
+    private static FileTime creationTime;
 
     private static String readFile(String filePath, boolean readAll, int wantedLines) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
@@ -84,64 +86,145 @@ public class FileUtils {
         } else {
             showFileWithFilter(filePath, readAll, wantedLines, filter);
         }
+
         try {
             File file = new File(filePath);
-            long fileLength = file.length();
-            long pointer = fileLength;
-
-            BasicFileAttributes bfattr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-            long creationTime = bfattr.creationTime().toInstant().toEpochMilli();
-
+            long lastPosition = file.length();
+            fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+            creationTime = fileAttributes.creationTime();
 
             while (true) {
                 if (!file.exists()) {
-                    System.out.println("File deleted, waiting for it to be recreated...");
+                    System.out.println("File not found, waiting for creation...");
                     while (!file.exists()) {
                         Thread.sleep(1000);
+                        file = new File(filePath);
                     }
-                    System.out.println("File recreated, resuming...");
-                    followingFile(filePath, false, 0, filter);
-                    return;
+                    System.out.println("File created, resuming monitoring...");
+                    lastPosition = 0;
+                    continue;
                 }
 
+                long currentLength = file.length();
+                long currentModified = file.lastModified();
+                FileTime currentCreationTime = Files.readAttributes(file.toPath(), BasicFileAttributes.class).creationTime();
 
-                try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-                    long currentLength = file.length();
-                    BasicFileAttributes currentAttrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-                    long currentCreationTime = currentAttrs.creationTime().toInstant().toEpochMilli();
-
-                    if (currentCreationTime != creationTime) {
-                        System.out.println("Log file rotated, starting from beginning");
-                        pointer = 0;
-                        followingFile(filePath, false, 0, filter);
-                        return;
-                    } else if (currentLength < pointer) {
-                        System.out.println("Log file truncated, restarting from beginning");
-                        pointer = 0;
-                        raf.seek(0);
-                    } else if (currentLength > pointer) {
-                        raf.seek(pointer);
-                        String line;
-                        while ((line = raf.readLine()) != null) {
-                            String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                            if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
-                                System.out.println(decodedLine);
-                            }
-                        }
-                        pointer = raf.getFilePointer();
-                    }
-
+                if (!currentCreationTime.equals(creationTime)) {
+                    System.out.println("Log rotated, switching to new file");
                     creationTime = currentCreationTime;
-                    fileLength = currentLength;
-                    Thread.sleep(1000);
+                    lastPosition = 0;
+                } // Detecta rotação (arquivo zerado e modificado recentemente)
+                else if (currentLength < lastPosition) {
+                    System.out.println("Log file truncated, restarting from beginning");
+                    lastPosition = 0;
                 }
+
+                // Detecta rotação: arquivo menor que a última posição ou data modificação muito recente
+//                if (currentLength < lastPosition || (currentLength == 0 && currentModified > lastModified)) {
+//                    System.out.println("Log rotated, switching to new file");
+//                    lastPosition = 0;
+//                    lastModified = currentModified;
+//                }
+
+                // Lê novas linhas se o arquivo cresceu
+                else if (currentLength > lastPosition) {
+                    List<String> newLines = readNewLines(filePath, lastPosition);
+                    for (String line : newLines) {
+                        if (filter == null || line.toLowerCase().contains(filter.toLowerCase())) {
+                            System.out.println(line);
+                        }
+                    }
+                    lastPosition = currentLength;
+                }
+
+                Thread.sleep(1000);
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
-            System.exit(1);
         } catch (Exception e) {
-            System.out.println("Error during following file: " + e.getMessage());
-            System.exit(1);
+            System.err.println("Error following file: " + e.getMessage());
+        }
+
+//        try {
+//            File file = new File(filePath);
+//            long fileLength = file.length();
+//            long pointer = fileLength;
+//
+//            BasicFileAttributes bfattr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+//            long creationTime = bfattr.creationTime().toInstant().toEpochMilli();
+//
+//
+//            while (true) {
+//                if (!file.exists()) {
+//                    System.out.println("File deleted, waiting for it to be recreated...");
+//                    while (!file.exists()) {
+//                        Thread.sleep(1000);
+//                    }
+//                    System.out.println("File recreated, resuming...");
+//                    followingFile(filePath, false, 0, filter);
+//                    return;
+//                }
+//
+//
+//                try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
+//                    long currentLength = file.length();
+//                    BasicFileAttributes currentAttrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+//                    long currentCreationTime = currentAttrs.creationTime().toInstant().toEpochMilli();
+//
+//                    if (currentCreationTime != creationTime) {
+//                        System.out.println("Log file rotated, starting from beginning");
+//                        pointer = 0;
+//                        followingFile(filePath, false, 0, filter);
+//                        return;
+//                    } else if (currentLength < pointer) {
+//                        System.out.println("Log file truncated, restarting from beginning");
+//                        pointer = 0;
+//                        raf.seek(0);
+//                    } else if (currentLength > pointer) {
+//                        raf.seek(pointer);
+//                        String line;
+//                        while ((line = raf.readLine()) != null) {
+//                            String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+//                            if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
+//                                System.out.println(decodedLine);
+//                            }
+//                        }
+//                        pointer = raf.getFilePointer();
+//                    }
+//
+//                    creationTime = currentCreationTime;
+//                    currentLength = fileLength;
+//                    Thread.sleep(1000);
+//                }
+//            }
+//        } catch (FileNotFoundException e) {
+//            System.err.println("File not found: " + filePath);
+//            System.exit(1);
+//        } catch (Exception e) {
+//            System.out.println("Error during following file: " + e.getMessage());
+//            System.exit(1);
+//        }
+    }
+
+    private static List<String> readNewLines(String filePath, long fromPosition) throws IOException {
+        List<String> newLines = new ArrayList<>();
+
+        try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
+            raf.seek(fromPosition);
+            String line;
+            while ((line = raf.readLine()) != null) {
+                newLines.add(new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
+            }
+        }
+
+        return newLines;
+    }
+
+    private static long getFileInode(File file) {
+        try {
+            BasicFileAttributes attrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+            Object fileKey = attrs.fileKey();
+            return fileKey != null ? fileKey.hashCode() : file.lastModified();
+        } catch (Exception e) {
+            return file.lastModified();
         }
     }
 }
