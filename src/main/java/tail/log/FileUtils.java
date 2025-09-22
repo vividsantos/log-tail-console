@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileUtils {
-    private static BasicFileAttributes fileAttributes;
-    private static FileTime creationTime;
 
     private static String readFile(String filePath, boolean readAll, int wantedLines) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
@@ -90,8 +88,6 @@ public class FileUtils {
         try {
             File file = new File(filePath);
             long lastPosition = file.length();
-            fileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-            creationTime = fileAttributes.creationTime();
 
             while (true) {
                 if (!file.exists()) {
@@ -106,15 +102,9 @@ public class FileUtils {
                 }
 
                 long currentLength = file.length();
-                long currentModified = file.lastModified();
-                FileTime currentCreationTime = Files.readAttributes(file.toPath(), BasicFileAttributes.class).creationTime();
 
-                if (!currentCreationTime.equals(creationTime)) {
+                if (currentLength < lastPosition) {
                     System.out.println("Log rotated, switching to new file");
-                    creationTime = currentCreationTime;
-                    lastPosition = 0;
-                } else if (currentLength < lastPosition) {
-                    System.out.println("Log file truncated, restarting from beginning");
                     lastPosition = 0;
                 } else if (currentLength > lastPosition) {
                     List<String> newLines = readNewLines(filePath, lastPosition);

@@ -57,6 +57,8 @@ public class LogTailArgsParser {
                 i++;
             } else if (arg.equalsIgnoreCase("-f") || arg.equalsIgnoreCase("--follow")) {
                 following = true;
+            } else if (arg.equalsIgnoreCase("--no-follow")) {
+                following = false;
             } else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
