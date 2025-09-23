@@ -2,18 +2,16 @@ package tail.log;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class FileUtils {
 
-    private static String readFile(String filePath, boolean readAll, int wantedLines) {
+    private static Optional<String> readFile(String filePath, boolean readAll, int wantedLines) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             long fileLength = raf.length();
             long pointer = fileLength - 1;
@@ -37,14 +35,9 @@ public class FileUtils {
             }
 
             byte[] conteudo = baos.toByteArray();
-            for (int i = 0, j = conteudo.length - 1; i < j; i++, j--) {
-                byte item = conteudo[i];
-                conteudo[i] = conteudo[j];
-                conteudo[j] = item;
-            }
+            reverseArray(conteudo);
 
-            String resultado = new String(conteudo, StandardCharsets.UTF_8);
-            return resultado.trim();
+            return Optional.of(new String(conteudo, StandardCharsets.UTF_8).trim());
 
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);
@@ -57,27 +50,66 @@ public class FileUtils {
         }
     }
 
-    public static void showFile(String filePath, boolean readAll, int wantedLines) {
-        String resultado = readFile(filePath, readAll, wantedLines);
-        if (resultado != null) {
-            System.out.println(resultado);
-            return;
+    private static void reverseArray(byte[] array) {
+        for (int i = 0, j = array.length - 1; i < j; i++, j--) {
+            byte temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
         }
     }
 
-    public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
-        String resultado = readFile(filePath, readAll, wantedLines);
-        assert resultado != null;
-        String[] linhas = resultado.split("\n");
 
-        int count = 0;
-        for (int i = linhas.length - 1; i >= 0; i--) {
-            if (linhas[i].toLowerCase().contains(filter.toLowerCase())) {
-                System.out.println(linhas[i].trim());
-                count++;
-                if(count>=wantedLines) break;
+    public static void showFile(String filePath, boolean readAll, int wantedLines) {
+        readFile(filePath, readAll, wantedLines)
+                .ifPresent(System.out::println);
+    }
+
+    public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
+        readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
+            String[] termos = filter.split("\\|");
+            String[] linhas = resultado.split("\n");
+            int count = 0;
+            for (int i = linhas.length - 1; i >= 0; i--) {
+                String linhaLower = linhas[i].toLowerCase();
+                boolean encontrou = false;
+                for (String termo : termos) {
+                    if (linhaLower.contains(termo.toLowerCase())) {
+                        encontrou = true;
+                        break;
+                    }
+                }
+                if (encontrou) {
+                    System.out.println(linhas[i].trim());
+                    count++;
+                    if (count >= wantedLines) break;
+                }
             }
-        }
+        });
+    }
+
+    public static void showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
+        readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
+            Pattern pattern = Pattern.compile(regex);
+            String[] linhas = resultado.split("\n");
+            for (String linha : linhas) {
+                if (pattern.matcher(linha).find()) {
+                    System.out.println(linha.trim());
+                }
+            }
+        });
+    }
+
+    public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
+        readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
+            Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
+            String[] linhas = resultado.split("\n");
+            int count = 0;
+            for (int i = linhas.length - 1; i >= 0; i--) {
+                if (!pattern.matcher(linhas[i]).find()) {
+                    System.out.println(linhas[i].trim());
+                }
+            }
+        });
     }
 
     public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter) {

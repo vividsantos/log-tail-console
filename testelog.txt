@@ -1,0 +1,20 @@
+2025-09-10 09:15:23 INFO  [AppStartup] - Aplicação iniciada com sucesso.
+2025-09-10 09:15:24 DEBUG [DatabaseConfig] - Conexão com o banco configurada: jdbc:mysql://localhost:3306/fluxo
+2025-09-10 09:15:25 INFO  [UserService] - Usuário 'viviane' autenticado com sucesso.
+2025-09-10 09:15:26 WARN  [CacheManager] - Cache próximo do limite de memória (85%).
+2025-09-10 09:15:27 ERROR [PaymentService] - Falha ao processar pagamento para pedido #12345.
+2025-09-10 09:15:28 INFO  [Scheduler] - Job 'RelatorioDiario' iniciado.
+2025-09-10 09:15:29 INFO  [Scheduler] - Job 'RelatorioDiario' concluído em 1.2s.
+2025-09-10 09:15:30 DEBUG [APIController] - Requisição recebida: GET /api/v1/users/45
+2025-09-10 09:15:31 INFO  [APIController] - Resposta enviada: 200 OK.
+2025-09-10 09:15:32 WARN  [AuthFilter] - Tentativa de login inválida para usuário 'admin'.
+2025-09-10 09:15:33 ERROR [FileService] - Não foi possível abrir arquivo /data/report.csv (Permissão negada).
+2025-09-10 09:15:34 INFO  [EmailService] - E-mail enviado para suporte@empresa.com.
+2025-09-10 09:15:35 DEBUG [MetricsCollector] - Tempo médio de resposta: 152ms.
+2025-09-10 09:15:36 WARN  [DatabasePool] - Número de conexões ativas muito alto (15/20).
+2025-09-10 09:15:37 INFO  [SystemMonitor] - Uso de CPU: 72%.
+2025-09-10 09:15:38 INFO  [SystemMonitor] - Uso de memória: 65%.
+2025-09-10 09:15:39 ERROR [NotificationService] - Falha ao enviar notificação push para usuário #998.
+2025-09-10 09:15:40 DEBUG [SessionManager] - Sessão ID=ABC123 renovada.
+2025-09-10 09:15:41 INFO  [BackupService] - Backup concluído com sucesso (arquivo backup_20250910.zip).
+2025-09-10 09:15:42 WARN  [APIController] - Endpoint /api/v1/deprecated será removido em versão futura.
