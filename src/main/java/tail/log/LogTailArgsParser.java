@@ -1,7 +1,5 @@
 package tail.log;
 
-import java.util.Objects;
-
 public class LogTailArgsParser {
 
     public String filePath;
@@ -12,6 +10,7 @@ public class LogTailArgsParser {
     public String exclude = null;
     public String regex = null;
     public ColorScheme colorScheme = ColorScheme.DEFAULT;
+    public String colorConfigPath = null;
 
     public LogTailArgsParser(String[] args) {
         int arquivosEncontrados = 0;
@@ -74,19 +73,48 @@ public class LogTailArgsParser {
                     System.exit(1);
                 }
 
-                if (args[i + 1].equalsIgnoreCase("default") ||
-                    args[i + 1].equalsIgnoreCase("dark") ||
-                    args[i + 1].equalsIgnoreCase("light") ||
-                    args[i + 1].equalsIgnoreCase("high-contrast") ||
-                    args[i + 1].equalsIgnoreCase("minimal")) {
-                    colorScheme = ColorScheme.valueOf(args[i + 1].toUpperCase().replace("-", "_"));
+                if(ColorUtils.defineColorScheme(args[i + 1]) != null){;
+                    colorScheme = ColorUtils.defineColorScheme(args[i + 1]);
                 } else {
                     System.err.println("Invalid color scheme: " + args[i + 1]);
                     System.err.println("Valid options are: default, dark, light, high-contrast, minimal");
                     System.exit(1);
                 }
                 i++;
-            } else {
+            } else if (arg.equalsIgnoreCase("--list-color-schemes")){
+                System.out.println("Available color schemes: \n" +
+                      "- Default: Standard colors for most terminals \n" +
+                      "- Dark: Optimized for dark backgrounds \n" +
+                      "- Light: Optimized for light backgrounds \n" +
+                      "- High-contrast: High contrast for accessibility \n" +
+                      "- Minimal: Only errors and warnings colored");
+                System.exit(0);
+            } else if (arg.equalsIgnoreCase("--preview-colors")) {
+                if (i + 1 >= args.length) {
+                    System.err.println("Missing color scheme after --preview-colors");
+                    System.exit(1);
+                }
+
+                if(ColorUtils.previewColors(args[i + 1]) != null){;
+                    for (String line : ColorUtils.previewColors(args[i + 1])) {
+                        System.out.println(line);
+                    }
+                } else {
+                    System.err.println("Invalid color scheme: " + args[i + 1]);
+                    System.err.println("Valid options are: default, dark, light, high-contrast, minimal");
+                    System.exit(1);
+                }
+                System.exit(0);
+                i++;
+            } else if (arg.equalsIgnoreCase("--color-config")) {
+                if (i + 1 >= args.length) {
+                    System.err.println("Missing config file path after --color-config");
+                    System.exit(1);
+                }
+                colorConfigPath = args[i + 1];
+                i++;
+            }
+            else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
             }

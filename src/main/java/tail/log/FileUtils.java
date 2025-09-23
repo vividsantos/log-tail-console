@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static tail.log.ColorUtils.coloredLines;
+
 public class FileUtils {
 
     public static ColorScheme colorScheme = ColorScheme.DEFAULT;
@@ -184,78 +186,5 @@ public class FileUtils {
         }
 
         return coloredLines(colorScheme, newLines);
-    }
-
-    private static List<String> coloredLines(ColorScheme colorScheme, List<String> linhas) {
-        List<String> coloredLines = new ArrayList<>();
-        if (colorScheme == ColorScheme.DEFAULT) {
-            for (String line : linhas) {
-                if (line.contains("ERROR")) {
-                    coloredLines.add(ConsoleColors.RED + line + ConsoleColors.RESET);
-                } else if (line.contains("WARN")) {
-                    coloredLines.add(ConsoleColors.YELLOW + line + ConsoleColors.RESET);
-                } else if (line.contains("INFO")) {
-                    coloredLines.add(ConsoleColors.GREEN + line + ConsoleColors.RESET);
-                } else if (line.contains("DEBUG")) {
-                    coloredLines.add(ConsoleColors.GRAY + line + ConsoleColors.RESET);
-                } else {
-                    coloredLines.add(line);
-                }
-            }
-        } else if (colorScheme == ColorScheme.DARK) {
-            for (String line : linhas) {
-                if (line.contains("ERROR")) {
-                    coloredLines.add(ConsoleColors.BRIGHT_RED + line + ConsoleColors.RESET);
-                } else if (line.contains("WARN")) {
-                    coloredLines.add(ConsoleColors.BRIGHT_YELLOW + line + ConsoleColors.RESET);
-                } else if (line.contains("INFO")) {
-                    coloredLines.add(ConsoleColors.BRIGHT_GREEN + line + ConsoleColors.RESET);
-                } else if (line.contains("DEBUG")) {
-                    coloredLines.add(ConsoleColors.WHITE + line + ConsoleColors.RESET);
-                } else {
-                    coloredLines.add(ConsoleColors.BRIGHT_WHITE + line + ConsoleColors.RESET);
-                }
-            }
-        } else if (colorScheme == ColorScheme.LIGHT) {
-            for (String line : linhas) {
-                if (line.contains("ERROR")) {
-                    coloredLines.add(ConsoleColors.DARK_RED + line + ConsoleColors.RESET);
-                } else if (line.contains("WARN")) {
-                    coloredLines.add(ConsoleColors.BROWN + line + ConsoleColors.RESET);
-                } else if (line.contains("INFO")) {
-                    coloredLines.add(ConsoleColors.DARK_GREEN + line + ConsoleColors.RESET);
-                } else if (line.contains("DEBUG")) {
-                    coloredLines.add(ConsoleColors.DARK_BLUE + line + ConsoleColors.RESET);
-                } else {
-                    coloredLines.add(ConsoleColors.BLACK + line + ConsoleColors.RESET);
-                }
-            }
-        } else if (colorScheme == ColorScheme.HIGH_CONTRAST) {
-            for (String line : linhas) {
-                if (line.contains("ERROR")) {
-                    coloredLines.add(ConsoleColors.BOLD_RED + line + ConsoleColors.RESET);
-                } else if (line.contains("WARN")) {
-                    coloredLines.add(ConsoleColors.BOLD_YELLOW + line + ConsoleColors.RESET);
-                } else if (line.contains("INFO")) {
-                    coloredLines.add(ConsoleColors.BOLD_CYAN + line + ConsoleColors.RESET);
-                } else if (line.contains("DEBUG")) {
-                    coloredLines.add(ConsoleColors.BOLD_MAGENTA + line + ConsoleColors.RESET);
-                } else {
-                    coloredLines.add(ConsoleColors.BOLD_WHITE + line + ConsoleColors.RESET);
-                }
-            }
-        } else if (colorScheme == ColorScheme.MINIMAL) {
-            for (String line : linhas) {
-                if (line.contains("ERROR")) {
-                    coloredLines.add(ConsoleColors.RED + line + ConsoleColors.RESET);
-                } else if (line.contains("WARN")) {
-                    coloredLines.add(ConsoleColors.YELLOW + line + ConsoleColors.RESET);
-                } else {
-                    coloredLines.add(line);
-                }
-            }
-        }
-
-        return coloredLines;
     }
 }
