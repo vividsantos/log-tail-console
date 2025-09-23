@@ -10,6 +10,8 @@ public class LogTailConsole {
 
     public static void main(String[] args) {
         LogTailArgsParser parser = new LogTailArgsParser(args);
+        FileUtils fileUtils = new FileUtils();
+        fileUtils.setColorScheme(parser.colorScheme);
 
         showFile(parser.filePath, parser.readAll, parser.wantedLines);
         Mode mode = Mode.SHOW;
@@ -47,5 +49,8 @@ public class LogTailConsole {
                 break;
         }
     }
+
+
+
 }
 

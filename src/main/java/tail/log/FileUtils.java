@@ -2,14 +2,16 @@ package tail.log;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class FileUtils {
+
+    public static ColorScheme colorScheme = ColorScheme.DEFAULT;
+
+    public void setColorScheme(ColorScheme colorScheme) {
+        FileUtils.colorScheme = colorScheme;
+    }
 
     private static Optional<String> readFile(String filePath, boolean readAll, int wantedLines) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
@@ -42,11 +44,11 @@ public class FileUtils {
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);
             System.exit(1);
-            return null;
+            return Optional.empty();
         } catch (Exception e) {
             System.err.println("Error reading file: " + e.getMessage());
             System.exit(1);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -58,13 +60,16 @@ public class FileUtils {
         }
     }
 
-
     public static void showFile(String filePath, boolean readAll, int wantedLines) {
-        readFile(filePath, readAll, wantedLines)
-                .ifPresent(System.out::println);
+        List<String> lines = readFile(filePath, readAll, wantedLines)
+                .map(resultado -> Arrays.asList(resultado.split("\n")))
+                .orElse(new ArrayList<>());
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             String[] termos = filter.split("\\|");
             String[] linhas = resultado.split("\n");
@@ -79,37 +84,45 @@ public class FileUtils {
                     }
                 }
                 if (encontrou) {
-                    System.out.println(linhas[i].trim());
+                    lines.add(linhas[i].trim());
                     count++;
                     if (count >= wantedLines) break;
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static void showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             Pattern pattern = Pattern.compile(regex);
             String[] linhas = resultado.split("\n");
             for (String linha : linhas) {
                 if (pattern.matcher(linha).find()) {
-                    System.out.println(linha.trim());
+                    lines.add(linha.trim());
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
             String[] linhas = resultado.split("\n");
             int count = 0;
             for (int i = linhas.length - 1; i >= 0; i--) {
                 if (!pattern.matcher(linhas[i]).find()) {
-                    System.out.println(linhas[i].trim());
+                    lines.add(linhas[i].trim());
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter) {
@@ -170,6 +183,79 @@ public class FileUtils {
             }
         }
 
-        return newLines;
+        return coloredLines(colorScheme, newLines);
+    }
+
+    private static List<String> coloredLines(ColorScheme colorScheme, List<String> linhas) {
+        List<String> coloredLines = new ArrayList<>();
+        if (colorScheme == ColorScheme.DEFAULT) {
+            for (String line : linhas) {
+                if (line.contains("ERROR")) {
+                    coloredLines.add(ConsoleColors.RED + line + ConsoleColors.RESET);
+                } else if (line.contains("WARN")) {
+                    coloredLines.add(ConsoleColors.YELLOW + line + ConsoleColors.RESET);
+                } else if (line.contains("INFO")) {
+                    coloredLines.add(ConsoleColors.GREEN + line + ConsoleColors.RESET);
+                } else if (line.contains("DEBUG")) {
+                    coloredLines.add(ConsoleColors.GRAY + line + ConsoleColors.RESET);
+                } else {
+                    coloredLines.add(line);
+                }
+            }
+        } else if (colorScheme == ColorScheme.DARK) {
+            for (String line : linhas) {
+                if (line.contains("ERROR")) {
+                    coloredLines.add(ConsoleColors.BRIGHT_RED + line + ConsoleColors.RESET);
+                } else if (line.contains("WARN")) {
+                    coloredLines.add(ConsoleColors.BRIGHT_YELLOW + line + ConsoleColors.RESET);
+                } else if (line.contains("INFO")) {
+                    coloredLines.add(ConsoleColors.BRIGHT_GREEN + line + ConsoleColors.RESET);
+                } else if (line.contains("DEBUG")) {
+                    coloredLines.add(ConsoleColors.WHITE + line + ConsoleColors.RESET);
+                } else {
+                    coloredLines.add(ConsoleColors.BRIGHT_WHITE + line + ConsoleColors.RESET);
+                }
+            }
+        } else if (colorScheme == ColorScheme.LIGHT) {
+            for (String line : linhas) {
+                if (line.contains("ERROR")) {
+                    coloredLines.add(ConsoleColors.DARK_RED + line + ConsoleColors.RESET);
+                } else if (line.contains("WARN")) {
+                    coloredLines.add(ConsoleColors.BROWN + line + ConsoleColors.RESET);
+                } else if (line.contains("INFO")) {
+                    coloredLines.add(ConsoleColors.DARK_GREEN + line + ConsoleColors.RESET);
+                } else if (line.contains("DEBUG")) {
+                    coloredLines.add(ConsoleColors.DARK_BLUE + line + ConsoleColors.RESET);
+                } else {
+                    coloredLines.add(ConsoleColors.BLACK + line + ConsoleColors.RESET);
+                }
+            }
+        } else if (colorScheme == ColorScheme.HIGH_CONTRAST) {
+            for (String line : linhas) {
+                if (line.contains("ERROR")) {
+                    coloredLines.add(ConsoleColors.BOLD_RED + line + ConsoleColors.RESET);
+                } else if (line.contains("WARN")) {
+                    coloredLines.add(ConsoleColors.BOLD_YELLOW + line + ConsoleColors.RESET);
+                } else if (line.contains("INFO")) {
+                    coloredLines.add(ConsoleColors.BOLD_CYAN + line + ConsoleColors.RESET);
+                } else if (line.contains("DEBUG")) {
+                    coloredLines.add(ConsoleColors.BOLD_MAGENTA + line + ConsoleColors.RESET);
+                } else {
+                    coloredLines.add(ConsoleColors.BOLD_WHITE + line + ConsoleColors.RESET);
+                }
+            }
+        } else if (colorScheme == ColorScheme.MINIMAL) {
+            for (String line : linhas) {
+                if (line.contains("ERROR")) {
+                    coloredLines.add(ConsoleColors.RED + line + ConsoleColors.RESET);
+                } else if (line.contains("WARN")) {
+                    coloredLines.add(ConsoleColors.YELLOW + line + ConsoleColors.RESET);
+                } else {
+                    coloredLines.add(line);
+                }
+            }
+        }
+
+        return coloredLines;
     }
 }

@@ -11,6 +11,7 @@ public class LogTailArgsParser {
     public boolean following = false;
     public String exclude = null;
     public String regex = null;
+    public ColorScheme colorScheme = ColorScheme.DEFAULT;
 
     public LogTailArgsParser(String[] args) {
         int arquivosEncontrados = 0;
@@ -34,7 +35,6 @@ public class LogTailArgsParser {
                 }
                 if (args.length >= i + 1  && Character.isDigit(args[i + 1].charAt(0))) {
                     String valor = args[i + 1];
-//                    LogTailArgsValidator.validarNumeroDeLinhas(valor);
                     wantedLines = Integer.parseInt(valor);
                 } else if (args[i + 1].startsWith("+") && args[i + 1].length() == 2 && args[i + 1].charAt(1) == '1') {
                     readAll = true;
@@ -68,6 +68,24 @@ public class LogTailArgsParser {
                 regex = args[++i];
             } else if ("--exclude".equals(args[i]) && i + 1 < args.length) {
                 exclude = args[++i];
+            }  else if (arg.equalsIgnoreCase("--color-scheme")) {
+                if (i + 1 >= args.length) {
+                    System.err.println("Missing color scheme after --color-scheme");
+                    System.exit(1);
+                }
+
+                if (args[i + 1].equalsIgnoreCase("default") ||
+                    args[i + 1].equalsIgnoreCase("dark") ||
+                    args[i + 1].equalsIgnoreCase("light") ||
+                    args[i + 1].equalsIgnoreCase("high-contrast") ||
+                    args[i + 1].equalsIgnoreCase("minimal")) {
+                    colorScheme = ColorScheme.valueOf(args[i + 1].toUpperCase().replace("-", "_"));
+                } else {
+                    System.err.println("Invalid color scheme: " + args[i + 1]);
+                    System.err.println("Valid options are: default, dark, light, high-contrast, minimal");
+                    System.exit(1);
+                }
+                i++;
             } else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
