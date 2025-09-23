@@ -1,9 +1,15 @@
 package tail.log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FileUtils {
 
@@ -81,33 +87,58 @@ public class FileUtils {
             showFileWithFilter(filePath, readAll, wantedLines, filter);
         }
 
-        try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-            long fileLength = raf.length();
-            long pointer = fileLength;
+        try {
+            File file = new File(filePath);
+            long lastPosition = file.length();
+            Set<String> processedLines = new HashSet<>();
 
             while (true) {
-                long currentLength = raf.length();
-                if (currentLength < pointer) {
-                    pointer = currentLength;
-                } else if (currentLength > pointer) {
-                    raf.seek(pointer);
-                    String line;
-                    while ((line = raf.readLine()) != null) {
-                        String decodedLine = new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                        if (filter == null || decodedLine.toLowerCase().contains(filter.toLowerCase())) {
-                            System.out.println(decodedLine);
+                if (!file.exists()) {
+                    System.out.println("File not found, waiting for creation...");
+                    while (!file.exists()) {
+//                        Thread.sleep(1000);
+                        file = new File(filePath);
+                    }
+                    System.out.println("File created, resuming monitoring...");
+                    processedLines.clear();
+                    continue;
+                }
+
+                long currentLength = file.length();
+
+                if (currentLength < lastPosition) {
+                    System.out.println("Log rotated, switched to new file");
+                    lastPosition = 0;
+                    processedLines.clear();
+                } else if (currentLength > lastPosition) {
+                    List<String> newLines = readNewLines(filePath, lastPosition);
+                    for (String line : newLines) {
+                        if (filter == null || line.toLowerCase().contains(filter.toLowerCase())) {
+                            if (!processedLines.contains(line)) {
+                                System.out.println(line);
+                                processedLines.add(line);
+                            }
                         }
                     }
-                    pointer = raf.getFilePointer();
+                    lastPosition = currentLength;
                 }
-                Thread.sleep(1000);
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + filePath);
-            System.exit(1);
         } catch (Exception e) {
-            System.out.println("Error during following file: " + e.getMessage());
-            System.exit(1);
+            System.err.println("Error following file: " + e.getMessage());
         }
+    }
+
+    private static List<String> readNewLines(String filePath, long fromPosition) throws IOException {
+        List<String> newLines = new ArrayList<>();
+
+        try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
+            raf.seek(fromPosition);
+            String line;
+            while ((line = raf.readLine()) != null) {
+                newLines.add(new String(line.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
+            }
+        }
+
+        return newLines;
     }
 }
