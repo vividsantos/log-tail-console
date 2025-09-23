@@ -128,7 +128,6 @@ public class FileUtils {
                 if (!file.exists()) {
                     System.out.println("File not found, waiting for creation...");
                     while (!file.exists()) {
-//                        Thread.sleep(1000);
                         file = new File(filePath);
                     }
                     System.out.println("File created, resuming monitoring...");
