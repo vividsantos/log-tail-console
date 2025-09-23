@@ -34,7 +34,7 @@ public class LogTailArgsParser {
                 }
                 if (args.length >= i + 1  && Character.isDigit(args[i + 1].charAt(0))) {
                     String valor = args[i + 1];
-                    LogTailArgsValidator.validarNumeroDeLinhas(valor);
+//                    LogTailArgsValidator.validarNumeroDeLinhas(valor);
                     wantedLines = Integer.parseInt(valor);
                 } else if (args[i + 1].startsWith("+") && args[i + 1].length() == 2 && args[i + 1].charAt(1) == '1') {
                     readAll = true;
@@ -48,12 +48,22 @@ public class LogTailArgsParser {
                 }
                 i++;
             } else if (arg.startsWith("-") && arg.length() > 1 && Character.isDigit(arg.charAt(1))) {
+                if (Integer.parseInt(arg.substring(1)) <= 0) {
+                    System.err.println("Invalid number of lines: " + arg.substring(1));
+                    System.err.println("Use positive number or +1 for all lines");
+                    System.exit(1);
+                }
+
                 wantedLines = Integer.parseInt(arg.substring(1));
             } else if (arg.startsWith("+") && arg.length() == 2 && arg.charAt(1) == '1') {
                 readAll = true;
             } else if (arg.equalsIgnoreCase("--filter") && i + 1 < args.length) {
                 filter = args[i + 1];
                 i++;
+            } else if (arg.equalsIgnoreCase("-f") || arg.equalsIgnoreCase("--follow")) {
+                following = true;
+            } else if (arg.equalsIgnoreCase("--no-follow")) {
+                following = false;
             } else if ("--regex".equals(args[i]) && i + 1 < args.length) {
                 regex = args[++i];
             } else if ("--exclude".equals(args[i]) && i + 1 < args.length) {
@@ -62,9 +72,7 @@ public class LogTailArgsParser {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
             }
-//            else if (arg.equalsIgnoreCase("-f") || arg.equalsIgnoreCase("--follow")) {
-//                following = true;
-//            }
+
         }
     }
 }
