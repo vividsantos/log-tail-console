@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class FileReaderUtils {
@@ -19,7 +19,7 @@ public class FileReaderUtils {
         }
     }
 
-    public static Optional<String> readFile(String filePath, boolean readAll, int wantedLines) {
+    public static List<String> readFile(String filePath, boolean readAll, int wantedLines) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             long fileLength = raf.length();
             long pointer = fileLength - 1;
@@ -44,60 +44,54 @@ public class FileReaderUtils {
 
             byte[] conteudo = baos.toByteArray();
             reverseArray(conteudo);
-
-            return Optional.of(new String(conteudo, StandardCharsets.UTF_8).trim());
+            String[] linhas = new String(conteudo, StandardCharsets.UTF_8).split("\n");
+            return Arrays.asList(linhas);
 
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);
         } catch (Exception e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
-        return Optional.empty();
+        return new ArrayList<>();
     }
 
     public static List<String> filterLines(String filePath, boolean readAll, int wantedLines, String filter) {
         List<String> result = new ArrayList<>();
-        readFile(filePath, readAll, wantedLines).ifPresent(conteudo -> {
-            String[] termos = filter.split("\\|");
-            String[] linhas = conteudo.split("\n");
-            for (String linha : linhas) {
-                String linhaLower = linha.toLowerCase();
-                for (String termo : termos) {
-                    if (linhaLower.contains(termo.toLowerCase())) {
-                        result.add(linha);
-                        break;
-                    }
+        List<String> linhas = readFile(filePath, readAll, wantedLines);
+        String[] termos = filter.split("\\|");
+        for (String linha : linhas) {
+            String linhaLower = linha.toLowerCase();
+            for (String termo : termos) {
+                if (linhaLower.contains(termo.toLowerCase())) {
+                    result.add(linha);
+                    break;
                 }
             }
-        });
+        }
         return result;
     }
 
     public static List<String> filterLinesWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
         List<String> result = new ArrayList<>();
-        readFile(filePath, readAll, wantedLines).ifPresent(conteudo -> {
-            Pattern pattern = Pattern.compile(regex);
-            String[] linhas = conteudo.split("\n");
-            for (String linha : linhas) {
-                if (pattern.matcher(linha).find()) {
-                    result.add(linha);
-                }
+        List<String> linhas = readFile(filePath, readAll, wantedLines);
+        Pattern pattern = Pattern.compile(regex);
+        for (String linha : linhas) {
+            if (pattern.matcher(linha).find()) {
+                result.add(linha);
             }
-        });
+        }
         return result;
     }
 
     public static List<String> filterLinesWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
         List<String> result = new ArrayList<>();
-        readFile(filePath, readAll, wantedLines).ifPresent(conteudo -> {
-            Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
-            String[] linhas = conteudo.split("\n");
-            for (String linha : linhas) {
-                if (!pattern.matcher(linha).find()) {
-                    result.add(linha);
-                }
+        List<String> linhas = readFile(filePath, readAll, wantedLines);
+        Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
+        for (String linha : linhas) {
+            if (!pattern.matcher(linha).find()) {
+                result.add(linha);
             }
-        });
+        }
         return result;
     }
 }

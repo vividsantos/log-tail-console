@@ -2,28 +2,48 @@ package tail.log;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class FileService {
 
-    public static void showFile(String filePath, boolean readAll, int wantedLines) {
-        FileReaderUtils.readFile(filePath, readAll, wantedLines)
-                .ifPresent(System.out::println);
+    private static final FileReaderUtils fileReader = new FileReaderUtils();
+
+    public static void exportLinesToFile(List<String> linhas, String outputPath) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputPath), StandardCharsets.UTF_8)) {
+            for (String linha : linhas) {
+                writer.write(linha);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao exportar linhas: " + e.getMessage());
+        }
     }
 
-    public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
+
+    public static List<String> showFile(String filePath, boolean readAll, int wantedLines) {
+        List<String> linhas = FileReaderUtils.readFile(filePath, readAll, wantedLines);
+        linhas.forEach(System.out::println);
+        return linhas;
+    }
+
+    public static List<String> showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
         List<String> linhas = FileReaderUtils.filterLines(filePath, readAll, wantedLines, filter);
         linhas.forEach(System.out::println);
+        return linhas;
     }
 
-    public static void showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
+    public static List<String> showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
         List<String> linhas = FileReaderUtils.filterLinesWithRegex(filePath, readAll, wantedLines, regex);
         linhas.forEach(System.out::println);
+        return linhas;
     }
 
-    public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
+    public static List<String> showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
         List<String> linhas = FileReaderUtils.filterLinesWithExclude(filePath, readAll, wantedLines, exclude);
         linhas.forEach(System.out::println);
+        return linhas;
     }
 
     public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter) {

@@ -1,0 +1,1 @@
+2025-09-10 09:15:40 DEBUG [SessionManager] - Sessão ID=ABC123 renovada.

@@ -11,6 +11,7 @@ public class LogTailArgsParser {
     public boolean following = false;
     public String exclude = null;
     public String regex = null;
+    public String export = null;
 
     public LogTailArgsParser(String[] args) {
         int arquivosEncontrados = 0;
@@ -19,14 +20,21 @@ public class LogTailArgsParser {
             String arg = args[i];
 
             if (!arg.startsWith("-") && !arg.startsWith("+") && arg.contains(".")) {
-                arquivosEncontrados++;
-                if (arquivosEncontrados > 1) {
-                    System.err.println("Multiple files not supported in this version");
-                    System.err.println("This feature is planned for a future release.");
-                    System.err.println("Current usage: java LogTailConsole [OPTIONS] FILE");
-                    System.exit(2);
+                if (export != null) {
+                    arquivosEncontrados++;
+                    if (arquivosEncontrados > 1) {
+                        System.err.println("Export supports only one input file");
+                        System.exit(2);
+                    }
+                    filePath = arg;
+                } else{
+                    arquivosEncontrados++;
+                    if (arquivosEncontrados > 1) {
+                        System.err.println("Multiple files not supported in this version");
+                        System.exit(2);
+                    }
+                    filePath = arg;
                 }
-                filePath = arg;
             } else if (arg.equalsIgnoreCase("-n")) {
                 if (i + 1 >= args.length) {
                     System.err.println("Missing number of lines after -n");
@@ -58,7 +66,9 @@ public class LogTailArgsParser {
                 regex = args[++i];
             } else if ("--exclude".equals(args[i]) && i + 1 < args.length) {
                 exclude = args[++i];
-            } else {
+            } else if ("--export".equals(args[i]) && i + 1 < args.length) {
+                export = args[++i];
+            }else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
             }
