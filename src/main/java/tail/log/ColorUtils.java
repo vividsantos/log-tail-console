@@ -17,8 +17,7 @@ public class ColorUtils {
             scheme.equalsIgnoreCase("dark") ||
             scheme.equalsIgnoreCase("light") ||
             scheme.equalsIgnoreCase("high-contrast") ||
-            scheme.equalsIgnoreCase("minimal") ||
-            scheme.equalsIgnoreCase("custom")
+            scheme.equalsIgnoreCase("minimal")
         ) {
             ColorScheme colorPreview = ColorScheme.valueOf(scheme.toUpperCase().replace("-", "_"));
 
@@ -28,6 +27,20 @@ public class ColorUtils {
         } else {
             return null;
         }
+    }
+
+    public static void previewCustomColors(CustomConfig config) {
+        String errorColor = config.getColorCode(config.getErrorColor());
+        System.out.println(errorColor + "[ERROR] This is an error message" + ConsoleColors.RESET);
+
+        String warnColor = config.getColorCode(config.getWarnColor());
+        System.out.println(warnColor + "[WARN]  This is a warning message" + ConsoleColors.RESET);
+
+        String infoColor = config.getColorCode(config.getInfoColor());
+        System.out.println(infoColor + "[INFO]  This is an info message" + ConsoleColors.RESET);
+
+        String debugColor = config.getColorCode(config.getDebugColor());
+        System.out.println(debugColor + "[DEBUG] This is a debug message" + ConsoleColors.RESET);
     }
 
     public static ColorScheme defineColorScheme(String scheme) {

@@ -1,5 +1,7 @@
 package tail.log;
 
+import java.io.IOException;
+
 public class LogTailArgsParser {
 
     public String filePath;
@@ -93,6 +95,22 @@ public class LogTailArgsParser {
                 if (i + 1 >= args.length) {
                     System.err.println("Missing color scheme after --preview-colors");
                     System.exit(1);
+                }
+
+                if (args[i + 1].equalsIgnoreCase("custom")) {
+                    if (colorConfigPath != null) {
+                        try {
+                            CustomConfig customConfig = CustomConfig.loadFromFile(colorConfigPath);
+                            ColorUtils.previewCustomColors(customConfig);
+                            System.exit(0);
+                        } catch (IOException e) {
+                            System.err.println("Error loading color config for preview: " + e.getMessage());
+                            System.exit(1);
+                        }
+                    } else {
+                        System.err.println("No custom color config specified. Use --color-config first.");
+                        System.exit(1);
+                    }
                 }
 
                 if(ColorUtils.previewColors(args[i + 1]) != null){;
