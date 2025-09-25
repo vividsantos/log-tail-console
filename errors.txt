@@ -1,3 +1,1 @@
-2025-09-10 09:15:27 ERROR [PaymentService] - Falha ao processar pagamento para pedido #12345.
-2025-09-10 09:15:33 ERROR [FileService] - Não foi possível abrir arquivo /data/report.csv (Permissão negada).
-2025-09-10 09:15:39 ERROR [NotificationService] - Falha ao enviar notificação push para usuário #998.
+2024-09-10 09:15:42 WARN  [APIController] - Endpoint /api/v1/deprecated será removido em versão futura.

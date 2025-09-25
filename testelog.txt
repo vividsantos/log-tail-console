@@ -18,3 +18,4 @@
 2025-09-10 09:15:40 DEBUG [SessionManager] - Sessão ID=ABC123 renovada.
 2025-09-10 09:15:41 INFO  [BackupService] - Backup concluído com sucesso (arquivo backup_20250910.zip).
 2025-09-10 09:15:42 WARN  [APIController] - Endpoint /api/v1/deprecated será removido em versão futura.
+2024-09-10 09:15:42 WARN  [APIController] - Endpoint /api/v1/deprecated será removido em versão futura.
