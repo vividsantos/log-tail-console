@@ -198,7 +198,7 @@ public class FileUtils {
                         filtered = followFileWithExclude(exclude, newLines);
                     }
 
-                    if (filtered.isEmpty()) {
+                    if (filter == null && regex == null && exclude == null) {
                         filtered = newLines;
                     }
 
