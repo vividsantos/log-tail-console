@@ -69,7 +69,7 @@ public class LogTailArgsParser {
             } else if ("--help".equalsIgnoreCase(arg)) {
                 System.out.println("Usage: java LogTailConsole [OPTIONS] FILE");
                 System.out.println("Options:");
-                System.out.println("  -n N, N         Show the last N lines (default is 10)");
+                System.out.println("  -n N, -N        Show the last N lines (default is 10)");
                 System.out.println("  -n +1, +1       Show all lines from the beginning");
                 System.out.println("  --filter TEXT   Show only lines containing TEXT (case insensitive, use | for OR)");
                 System.out.println("  --regex TEXT    Show only lines matching the regex TEXT");
@@ -78,7 +78,6 @@ public class LogTailArgsParser {
                 System.out.println("  --no-follow     Do not follow the file (default behavior)");
                 System.out.println("  -h, --help      Show this help message");
                 System.exit(0);
-
             } else {
                 System.err.println("Unknown argument: " + arg);
                 System.exit(1);
