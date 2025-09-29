@@ -12,33 +12,28 @@ import java.util.regex.Pattern;
 public class FileUtils {
 
     private static Optional<String> readFile(String filePath, boolean readAll, int wantedLines) {
-        try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
-            long fileLength = raf.length();
-            long pointer = fileLength - 1;
-            int foundLines = 0;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
+
+            List<String> lines = new ArrayList<>();
+            String line;
+            int qtdLines = 0;
 
             if (readAll) {
-                wantedLines = (int) (raf.length() - 1);
-            }
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            while (pointer >= 0 && foundLines <= wantedLines) {
-                raf.seek(pointer);
-                int qtByte = raf.readByte();
-                baos.write(qtByte);
-
-                if (qtByte == '\n') {
-                    foundLines++;
+                while ((line = reader.readLine()) != null) {
+                    lines.add(line);
                 }
-                pointer--;
+                return Optional.of(String.join(System.lineSeparator(), lines));
             }
 
-            byte[] conteudo = baos.toByteArray();
-            reverseArray(conteudo);
+            while ((line = reader.readLine()) != null && qtdLines < wantedLines) {
+                lines.add(line);
+                qtdLines++;
+            }
 
-            return Optional.of(new String(conteudo, StandardCharsets.UTF_8).trim());
+            int startIndex = Math.max(0, lines.size() - wantedLines);
+            List<String> lastLines = lines.subList(startIndex, lines.size());
 
+            return Optional.of(String.join(System.lineSeparator(), lastLines));
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);
             System.exit(1);
