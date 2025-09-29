@@ -11,7 +11,6 @@ public class LogTailConsole {
     public static void main(String[] args) {
         LogTailArgsParser parser = new LogTailArgsParser(args);
 
-        showFile(parser.filePath, parser.readAll, parser.wantedLines);
         Mode mode = Mode.SHOW;
         if (parser.filePath == null) {
             mode = Mode.INVALID;
@@ -31,7 +30,7 @@ public class LogTailConsole {
                 System.err.println("Usage: java LogTailConsole [OPTIONS] FILE");
                 break;
             case FOLLOW:
-                followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);
+                followingFile(parser.filePath, parser.readAll, parser.wantedLines, parser.filter, parser.regex, parser.exclude);
                 break;
             case FILTER:
                 showFileWithFilter(parser.filePath, parser.readAll, parser.wantedLines, parser.filter);

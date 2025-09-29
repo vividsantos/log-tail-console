@@ -1,7 +1,5 @@
 package tail.log;
 
-import java.util.Objects;
-
 public class LogTailArgsParser {
 
     public String filePath;

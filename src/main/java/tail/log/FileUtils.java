@@ -68,9 +68,9 @@ public class FileUtils {
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             String[] termos = filter.split("\\|");
             String[] linhas = resultado.split("\n");
-            int count = 0;
-            for (int i = linhas.length - 1; i >= 0; i--) {
-                String linhaLower = linhas[i].toLowerCase();
+
+            for (String linha : linhas) {
+                String linhaLower = linha.toLowerCase();
                 boolean encontrou = false;
                 for (String termo : termos) {
                     if (linhaLower.contains(termo.toLowerCase())) {
@@ -79,12 +79,30 @@ public class FileUtils {
                     }
                 }
                 if (encontrou) {
-                    System.out.println(linhas[i].trim());
-                    count++;
-                    if (count >= wantedLines) break;
+                    System.out.println(linha.trim());
                 }
             }
         });
+    }
+
+    public static List<String> followFileWithFilter(String filter, List<String> listaLinhas) {
+        String[] termos = filter.split("\\|");
+        List<String> filtered = new ArrayList<>();
+
+        for (String linha : listaLinhas) {
+            String linhaLower = linha.toLowerCase();
+            boolean encontrou = false;
+            for (String termo : termos) {
+                if (linhaLower.contains(termo.toLowerCase())) {
+                    encontrou = true;
+                    break;
+                }
+            }
+            if (encontrou) {
+                filtered.add(linha.trim());
+            }
+        }
+        return filtered;
     }
 
     public static void showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
@@ -99,11 +117,22 @@ public class FileUtils {
         });
     }
 
+    public static List<String> followFileWithRegex(String regex, List<String> listaLinhas) {
+        Pattern pattern = Pattern.compile(regex);
+        List<String> filtered = new ArrayList<>();
+
+        for (int i = listaLinhas.size() - 1; i >= 0; i--) {
+            if (pattern.matcher(listaLinhas.get(i)).find()) {
+                filtered.add(listaLinhas.get(i).trim());
+            }
+        }
+        return filtered;
+    }
+
     public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
             String[] linhas = resultado.split("\n");
-            int count = 0;
             for (int i = linhas.length - 1; i >= 0; i--) {
                 if (!pattern.matcher(linhas[i]).find()) {
                     System.out.println(linhas[i].trim());
@@ -112,11 +141,27 @@ public class FileUtils {
         });
     }
 
-    public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter) {
-        if (filter == null) {
-            showFile(filePath, readAll, wantedLines);
-        } else {
+    public static List<String> followFileWithExclude(String exclude, List<String> listaLinhas) {
+        Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
+        List<String> filtered = new ArrayList<>();
+
+        for (int i = listaLinhas.size() - 1; i >= 0; i--) {
+            if (!pattern.matcher(listaLinhas.get(i)).find()) {
+                filtered.add(listaLinhas.get(i).trim());
+            }
+        }
+        return filtered;
+    }
+
+    public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter, String regex, String exclude) {
+        if (filter != null) {
             showFileWithFilter(filePath, readAll, wantedLines, filter);
+        } else if (regex != null) {
+            showFileWithRegex(filePath, readAll, wantedLines, regex);
+        } else if (exclude != null) {
+            showFileWithExclude(filePath, readAll, wantedLines, exclude);
+        } else {
+            showFile(filePath, readAll, wantedLines);
         }
 
         try {
@@ -143,14 +188,27 @@ public class FileUtils {
                     processedLines.clear();
                 } else if (currentLength > lastPosition) {
                     List<String> newLines = readNewLines(filePath, lastPosition);
-                    for (String line : newLines) {
-                        if (filter == null || line.toLowerCase().contains(filter.toLowerCase())) {
-                            if (!processedLines.contains(line)) {
-                                System.out.println(line);
-                                processedLines.add(line);
-                            }
+                    List<String> filtered = new ArrayList<>();
+
+                    if (filter != null) {
+                        filtered = followFileWithFilter(filter, newLines);
+                    } else if (regex != null) {
+                        filtered = followFileWithRegex(regex, newLines);
+                    } else if (exclude != null) {
+                        filtered = followFileWithExclude(exclude, newLines);
+                    }
+
+                    if (filter == null && regex == null && exclude == null) {
+                        filtered = newLines;
+                    }
+
+                    for (String line : filtered) {
+                        if (!processedLines.contains(line)) {
+                            System.out.println(line);
+                            processedLines.add(line);
                         }
                     }
+
                     lastPosition = currentLength;
                 }
             }
