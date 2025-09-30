@@ -1,5 +1,8 @@
 package tail.log;
 
+import java.io.IOException;
+
+import static tail.log.ColorUtils.setCustomConfig;
 import static tail.log.FileUtils.*;
 
 public class LogTailConsole {
@@ -10,6 +13,21 @@ public class LogTailConsole {
 
     public static void main(String[] args) {
         LogTailArgsParser parser = new LogTailArgsParser(args);
+        CustomConfig customConfig = null;
+        FileUtils fileUtils = new FileUtils();
+        fileUtils.setColorScheme(parser.colorScheme);
+
+        if (parser.colorConfigPath != null) {
+            try {
+                customConfig = CustomConfig.loadFromFile(parser.colorConfigPath);
+                parser.colorScheme = ColorScheme.CUSTOM;
+                fileUtils.setColorScheme(parser.colorScheme);
+                setCustomConfig(customConfig);
+            } catch (IOException e) {
+                System.err.println("Error loading color config: " + e.getMessage());
+                System.exit(1);
+            }
+        }
 
         Mode mode = Mode.SHOW;
         if (parser.filePath == null) {
@@ -46,5 +64,8 @@ public class LogTailConsole {
                 break;
         }
     }
+
+
+
 }
 
