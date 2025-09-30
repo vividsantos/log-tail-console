@@ -164,6 +164,10 @@ public class FileUtils {
     }
 
     public static void followingFile(String filePath, boolean readAll, int wantedLines, String filter, String regex, String exclude) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("\nMonitoring stopped by user");
+        }));
+
         if (filter != null) {
             showFileWithFilter(filePath, readAll, wantedLines, filter);
         } else if (regex != null) {
