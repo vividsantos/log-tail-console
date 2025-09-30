@@ -1,4 +1,4 @@
-package tail.log;
+package tail.log.themes;
 
 public class ConsoleColors {
     // Reset

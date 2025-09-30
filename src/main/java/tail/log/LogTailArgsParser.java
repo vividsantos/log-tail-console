@@ -1,5 +1,11 @@
 package tail.log;
 
+import tail.log.themes.ColorScheme;
+import tail.log.themes.ColorUtils;
+import tail.log.themes.CustomConfig;
+
+import java.io.IOException;
+
 public class LogTailArgsParser {
 
     public String filePath;
@@ -94,7 +100,6 @@ public class LogTailArgsParser {
                     System.err.println("Missing color scheme after --preview-colors");
                     System.exit(1);
                 }
-
                 if (args[i + 1].equalsIgnoreCase("custom")) {
                     if (colorConfigPath != null) {
                         try {
