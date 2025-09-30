@@ -2,14 +2,18 @@ package tail.log;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 
+import static tail.log.ColorUtils.coloredLines;
+
 public class FileUtils {
+
+    public static ColorScheme colorScheme = ColorScheme.DEFAULT;
+
+    public void setColorScheme(ColorScheme colorScheme) {
+        FileUtils.colorScheme = colorScheme;
+    }
 
     private static Optional<String> readFile(String filePath, boolean readAll, int wantedLines) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
@@ -37,11 +41,11 @@ public class FileUtils {
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filePath);
             System.exit(1);
-            return null;
+            return Optional.empty();
         } catch (Exception e) {
             System.err.println("Error reading file: " + e.getMessage());
             System.exit(1);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -53,13 +57,16 @@ public class FileUtils {
         }
     }
 
-
     public static void showFile(String filePath, boolean readAll, int wantedLines) {
-        readFile(filePath, readAll, wantedLines)
-                .ifPresent(System.out::println);
+        List<String> lines = readFile(filePath, readAll, wantedLines)
+                .map(resultado -> Arrays.asList(resultado.split("\n")))
+                .orElse(new ArrayList<>());
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static void showFileWithFilter(String filePath, boolean readAll, int wantedLines, String filter) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             String[] termos = filter.split("\\|");
             String[] linhas = resultado.split("\n");
@@ -78,6 +85,8 @@ public class FileUtils {
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static List<String> followFileWithFilter(String filter, List<String> listaLinhas) {
@@ -101,15 +110,18 @@ public class FileUtils {
     }
 
     public static void showFileWithRegex(String filePath, boolean readAll, int wantedLines, String regex) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             Pattern pattern = Pattern.compile(regex);
             String[] linhas = resultado.split("\n");
             for (String linha : linhas) {
                 if (pattern.matcher(linha).find()) {
-                    System.out.println(linha.trim());
+                    lines.add(linha.trim());
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static List<String> followFileWithRegex(String regex, List<String> listaLinhas) {
@@ -125,15 +137,18 @@ public class FileUtils {
     }
 
     public static void showFileWithExclude(String filePath, boolean readAll, int wantedLines, String exclude) {
+        List<String> lines = new ArrayList<>(Collections.emptyList());
         readFile(filePath, readAll, wantedLines).ifPresent(resultado -> {
             Pattern pattern = Pattern.compile(exclude, Pattern.CASE_INSENSITIVE);
             String[] linhas = resultado.split("\n");
             for (int i = linhas.length - 1; i >= 0; i--) {
                 if (!pattern.matcher(linhas[i]).find()) {
-                    System.out.println(linhas[i].trim());
+                    lines.add(linhas[i].trim());
                 }
             }
         });
+
+        coloredLines(colorScheme, lines).forEach(System.out::println);
     }
 
     public static List<String> followFileWithExclude(String exclude, List<String> listaLinhas) {
@@ -223,6 +238,6 @@ public class FileUtils {
             }
         }
 
-        return newLines;
+        return coloredLines(colorScheme, newLines);
     }
 }
