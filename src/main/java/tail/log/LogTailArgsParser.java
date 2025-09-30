@@ -1,7 +1,5 @@
 package tail.log;
 
-import java.io.IOException;
-
 public class LogTailArgsParser {
 
     public String filePath;
