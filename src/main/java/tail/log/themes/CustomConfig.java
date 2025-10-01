@@ -1,4 +1,4 @@
-package tail.log;
+package tail.log.themes;
 
 import java.io.FileInputStream;
 import java.io.IOException;

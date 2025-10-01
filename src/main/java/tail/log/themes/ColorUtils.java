@@ -1,4 +1,4 @@
-package tail.log;
+package tail.log.themes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
