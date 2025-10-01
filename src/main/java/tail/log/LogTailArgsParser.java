@@ -110,7 +110,6 @@ public class LogTailArgsParser {
                     System.err.println("Missing color scheme after --preview-colors");
                     System.exit(1);
                 }
-
                 if (args[i + 1].equalsIgnoreCase("custom")) {
                     if (colorConfigPath != null) {
                         try {
