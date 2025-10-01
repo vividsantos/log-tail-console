@@ -5,6 +5,7 @@ import tail.log.themes.ColorUtils;
 import tail.log.themes.CustomConfig;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class LogTailArgsParser {
 
@@ -20,6 +21,15 @@ public class LogTailArgsParser {
 
     public LogTailArgsParser(String[] args) {
         int arquivosEncontrados = 0;
+
+        if ((Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("-f")) ||
+            Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--follow"))) &&
+            Arrays.stream(args).anyMatch(arg -> arg.equalsIgnoreCase("--no-follow")))
+        {
+            System.err.println("Cannot use -f/--follow and --no-follow together.");
+            System.err.println("Use just one option.");
+            System.exit(1);
+        }
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
