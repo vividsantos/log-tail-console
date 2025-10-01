@@ -1,8 +1,11 @@
 package tail.log;
 
+import tail.log.themes.ColorScheme;
+import tail.log.themes.CustomConfig;
+
 import java.io.IOException;
 
-import static tail.log.ColorUtils.setCustomConfig;
+import static tail.log.themes.ColorUtils.setCustomConfig;
 import static tail.log.FileUtils.*;
 
 public class LogTailConsole {

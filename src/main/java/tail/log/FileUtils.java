@@ -1,11 +1,13 @@
 package tail.log;
 
+import tail.log.themes.ColorScheme;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static tail.log.ColorUtils.coloredLines;
+import static tail.log.themes.ColorUtils.coloredLines;
 
 public class FileUtils {
 
@@ -46,14 +48,6 @@ public class FileUtils {
             System.err.println("Error reading file: " + e.getMessage());
             System.exit(1);
             return Optional.empty();
-        }
-    }
-
-    private static void reverseArray(byte[] array) {
-        for (int i = 0, j = array.length - 1; i < j; i++, j--) {
-            byte temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
         }
     }
 
